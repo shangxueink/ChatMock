@@ -12,6 +12,7 @@ from .app import create_app
 from .config import CLIENT_ID_DEFAULT
 from .limits import RateLimitWindow, compute_reset_at, load_rate_limit_snapshot
 from .oauth import OAuthHTTPServer, OAuthHandler, REQUIRED_PORT, URL_BASE
+from .runtime import make_access_log_handler
 from .utils import eprint, get_home_dir, load_chatgpt_tokens, parse_jwt_claims, read_auth_file
 
 
@@ -270,6 +271,9 @@ def cmd_serve(
     debug_model: str | None,
     expose_reasoning_models: bool,
     default_web_search: bool,
+    ip_remarks_file: str | None,
+    bad_gateway_window_start: str | None,
+    bad_gateway_window_end: str | None,
 ) -> int:
     app = create_app(
         verbose=verbose,
@@ -280,9 +284,20 @@ def cmd_serve(
         debug_model=debug_model,
         expose_reasoning_models=expose_reasoning_models,
         default_web_search=default_web_search,
+        ip_remarks_file=ip_remarks_file,
+        bad_gateway_window_start=bad_gateway_window_start,
+        bad_gateway_window_end=bad_gateway_window_end,
     )
 
-    app.run(host=host, debug=False, use_reloader=False, port=port, threaded=True)
+    request_handler = make_access_log_handler(app.config["IP_REMARKS_REGISTRY"])
+    app.run(
+        host=host,
+        debug=False,
+        use_reloader=False,
+        port=port,
+        threaded=True,
+        request_handler=request_handler,
+    )
     return 0
 
 
@@ -348,6 +363,24 @@ def main() -> None:
             "Also configurable via CHATGPT_LOCAL_ENABLE_WEB_SEARCH."
         ),
     )
+    p_serve.add_argument(
+        "--ip-remarks-file",
+        default=os.getenv("CHATMOCK_IP_REMARKS_FILE"),
+        help=(
+            "JSON file mapping client IPs to display names for access logs. "
+            "Defaults to CHATMOCK_IP_REMARKS_FILE or ./ip_remarks.json."
+        ),
+    )
+    p_serve.add_argument(
+        "--daily-bad-gateway-start",
+        default=os.getenv("CHATMOCK_DAILY_BAD_GATEWAY_START"),
+        help="Local start time for the daily forced 502 window in HH:MM format (default: 00:00).",
+    )
+    p_serve.add_argument(
+        "--daily-bad-gateway-end",
+        default=os.getenv("CHATMOCK_DAILY_BAD_GATEWAY_END"),
+        help="Local end time for the daily forced 502 window in HH:MM format (default: 00:30).",
+    )
 
     p_info = sub.add_parser("info", help="Print current stored tokens and derived account id")
     p_info.add_argument("--json", action="store_true", help="Output raw auth.json contents")
@@ -369,6 +402,9 @@ def main() -> None:
                 debug_model=args.debug_model,
                 expose_reasoning_models=args.expose_reasoning_models,
                 default_web_search=args.enable_web_search,
+                ip_remarks_file=args.ip_remarks_file,
+                bad_gateway_window_start=args.daily_bad_gateway_start,
+                bad_gateway_window_end=args.daily_bad_gateway_end,
             )
         )
     elif args.command == "info":

@@ -154,6 +154,38 @@ You can enable it by starting the server with this parameter, which will allow O
 }
 ```
 
+### Access log IP remarks
+
+- `--ip-remarks-file`<br>
+You can map LAN client IPs to human-readable remarks in the access log. The file must be a JSON object, for example:
+
+```json
+{
+  "100.118.107.65": "lab-pc-01",
+  "100.118.107.66": "lab-pc-02"
+}
+```
+
+With that file loaded, a request log line changes from:
+
+```text
+100.118.107.65 - - [29/Mar/2026 00:39:22] "POST /v1/chat/completions HTTP/1.1" 200 -
+```
+
+to:
+
+```text
+100.118.107.65 - montmorill - [29/Mar/2026 00:39:22] "POST /v1/chat/completions HTTP/1.1" 200 -
+```
+
+If you do not pass `--ip-remarks-file`, ChatMock will look for `./ip_remarks.json` by default. You can also set `CHATMOCK_IP_REMARKS_FILE`.
+
+### Daily maintenance 502 window
+
+- `--daily-bad-gateway-start`
+- `--daily-bad-gateway-end`<br>
+ChatMock can force a daily `502 Bad Gateway` response during a known outage window. By default, the local-time window is `00:00` to `00:30`, which avoids upstream timeout noise during a scheduled network disconnect period. You can override these times with CLI flags or `CHATMOCK_DAILY_BAD_GATEWAY_START` / `CHATMOCK_DAILY_BAD_GATEWAY_END`.
+
 ### Expose reasoning models
 
 - `--expose-reasoning-models`<br>
