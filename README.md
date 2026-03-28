@@ -55,9 +55,9 @@ You can make sure this worked by running `python chatmock.py info`
 ```bash
 python chatmock.py serve
 ```
-Then, you can simply use the address and port as the baseURL as you require (http://127.0.0.1:8000 by default)
+Then, you can simply use the address and port as the baseURL as you require (http://0.0.0.0:8000 by default)
 
-**Reminder:** When setting a baseURL in other applications, make you sure you include /v1/ at the end of the URL if you're using this as a OpenAI compatible endpoint (e.g http://127.0.0.1:8000/v1)
+**Reminder:** When setting a baseURL in other applications, make you sure you include /v1/ at the end of the URL if you're using this as a OpenAI compatible endpoint (e.g http://0.0.0.0:8000/v1)
 
 ### Docker
 
@@ -71,7 +71,7 @@ Read [the docker instrunctions here](https://github.com/RayBytes/ChatMock/blob/m
 from openai import OpenAI
 
 client = OpenAI(
-    base_url="http://127.0.0.1:8000/v1",
+    base_url="http://0.0.0.0:8000/v1",
     api_key="key"  # ignored
 )
 
@@ -86,7 +86,7 @@ print(resp.choices[0].message.content)
 ### curl
 
 ```bash
-curl http://127.0.0.1:8000/v1/chat/completions \
+curl http://0.0.0.0:8000/v1/chat/completions \
   -H "Authorization: Bearer key" \
   -H "Content-Type: application/json" \
   -d '{

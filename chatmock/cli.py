@@ -194,7 +194,7 @@ def cmd_login(no_browser: bool, verbose: bool) -> int:
         return 1
 
     try:
-        bind_host = os.getenv("CHATGPT_LOCAL_LOGIN_BIND", "127.0.0.1")
+        bind_host = os.getenv("CHATGPT_LOCAL_LOGIN_BIND", "0.0.0.0")
         httpd = OAuthHTTPServer((bind_host, REQUIRED_PORT), OAuthHandler, home_dir=home_dir, client_id=client_id, verbose=verbose)
     except OSError as e:
         eprint(f"ERROR: {e}")
@@ -295,7 +295,7 @@ def main() -> None:
     p_login.add_argument("--verbose", action="store_true", help="Enable verbose logging")
 
     p_serve = sub.add_parser("serve", help="Run local OpenAI-compatible server")
-    p_serve.add_argument("--host", default="127.0.0.1")
+    p_serve.add_argument("--host", default="0.0.0.0")
     p_serve.add_argument("--port", type=int, default=8000)
     p_serve.add_argument("--verbose", action="store_true", help="Enable verbose logging")
     p_serve.add_argument(

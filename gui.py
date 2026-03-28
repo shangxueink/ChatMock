@@ -37,7 +37,7 @@ class ServerProcess(QtCore.QObject):
     def __init__(self) -> None:
         super().__init__()
         self._proc: QtCore.QProcess | None = None
-        self._host = "127.0.0.1"
+        self._host = "0.0.0.0"
         self._port = 8000
         self._effort = "medium"
         self._summary = "auto"
@@ -300,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
         form.setHorizontalSpacing(12)
         form.setVerticalSpacing(8)
         form.addWidget(QtWidgets.QLabel("Host"), 0, 0)
-        self.host_edit = QtWidgets.QLineEdit("127.0.0.1")
+        self.host_edit = QtWidgets.QLineEdit("0.0.0.0")
         self.host_edit.setClearButtonEnabled(True)
         self.host_edit.setMinimumWidth(220)
         self.host_edit.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
@@ -455,7 +455,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def _start_server(self) -> None:
         try:
-            host = self.host_edit.text().strip() or "127.0.0.1"
+            host = self.host_edit.text().strip() or "0.0.0.0"
             port = int(self.port_edit.text().strip() or "8000")
         except ValueError:
             QtWidgets.QMessageBox.critical(self, "Port", "Invalid port number.")
@@ -519,7 +519,7 @@ def main() -> None:
 
         p = argparse.ArgumentParser(add_help=False)
         p.add_argument("--run-server", action="store_true")
-        p.add_argument("--host", default="127.0.0.1")
+        p.add_argument("--host", default="0.0.0.0")
         p.add_argument("--port", type=int, default=8000)
         p.add_argument("--effort", default="medium")
         p.add_argument("--summary", default="auto")
